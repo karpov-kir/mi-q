@@ -1,0 +1,11 @@
+.idea
+dist
+node_modules
+
+*.orig
+*.DS_Store
+npm-debug.log*
+
+/quotes
+/build
+/browser-extensions/chrome/build
