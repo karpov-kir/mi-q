@@ -71,12 +71,12 @@ export function ToDo() {
     [],
   );
 
-  if (error) {
-    return <div>Could not initialize the shortcuts</div>;
+  if (!isInitialized) {
+    return null;
   }
 
-  if (!toDoReducerState || !isInitialized) {
-    return null;
+  if (error) {
+    return <div>Could not initialize the shortcuts</div>;
   }
 
   const { categoryId } = toDoReducerState;

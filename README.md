@@ -26,7 +26,7 @@ The project is under development, it is not available to be used yet.
 
 ## Requirements
 
-- A modern browser
+- A recent version of a modern browser
 
 ## Features
 
@@ -41,7 +41,7 @@ The project is under development, it is not available to be used yet.
 
 As everything is stored only in your browser:
 
-- There is no synchronisation between browsers and different devices
+- There is no synchronisation between browsers and devices
 - If you clean your browser storage data then all shortcuts and to do list items will be removed
 
 ## Roadmap

@@ -6,7 +6,7 @@ export interface ToDoPersistedStorageData {
   categoryId: string;
 }
 
-export const toDoPersistedStorage = new PersistedStorage<ToDoPersistedStorageData, ToDoPersistedStorageData>('to-do', {
+export const toDoPersistedStorage = new PersistedStorage<ToDoPersistedStorageData>('to-do', {
   items: [],
   categoryId: toDoCategories[0].id,
 });

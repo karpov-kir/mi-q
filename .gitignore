@@ -1,5 +1,5 @@
 .idea
-dist
+build
 node_modules
 
 *.orig
@@ -7,5 +7,3 @@ node_modules
 npm-debug.log*
 
 /quotes
-/build
-/browser-extensions/chrome/build

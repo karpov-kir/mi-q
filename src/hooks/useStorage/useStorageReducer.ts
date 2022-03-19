@@ -2,7 +2,6 @@ import {
   Dispatch as ReactDispatch,
   Reducer as ReactReducer,
   ReducerAction,
-  ReducerState,
   useCallback,
   useEffect,
   useMemo,
@@ -21,19 +20,32 @@ interface UseStorageReducerProps<StorageData, Reducer extends ReactReducer<Stora
   reducer: Reducer;
 }
 
-interface HookResult<StorageData, Reducer extends ReactReducer<StorageData | undefined, unknown>> {
-  isInitialized: boolean;
-  error?: Error;
-  reducerState?: StorageData;
-  dispatch: ReactDispatch<ReducerAction<Reducer>>;
-}
+type HookResult<StorageData, Reducer extends ReactReducer<StorageData | undefined, unknown>> =
+  | {
+      isInitialized: true;
+      error: undefined;
+      reducerState: StorageData;
+      dispatch: ReactDispatch<ReducerAction<Reducer>>;
+    }
+  | {
+      isInitialized: true;
+      error: Error;
+      reducerState: undefined;
+      dispatch: ReactDispatch<ReducerAction<Reducer>>;
+    }
+  | {
+      isInitialized: false;
+      error: undefined;
+      reducerState: undefined;
+      dispatch: ReactDispatch<ReducerAction<Reducer>>;
+    };
 
-interface StorageAction {
+interface StorageAction<StorageData> {
   type: symbol;
-  data: unknown;
+  data: StorageData;
 }
 
-const STORAGE_ACTION_TYPE = Symbol('Init');
+const STORAGE_ACTION_TYPE = Symbol('Storage action');
 
 export function useStorageReducer<
   StorageData,
@@ -46,9 +58,18 @@ export function useStorageReducer<
   const { storage, reducer } = props;
   const storageManager = useMemo(() => registerStorageManagerForStorage(storage), []);
 
-  // TODO find out why the type is not inferred
-  const initialState = storageManager.data as ReducerState<Reducer>;
-  const reducerWithMiddleware = useMemo(() => injectMiddlewareToReducer<StorageData, Reducer>(reducer), []);
+  const initialState = storageManager.data;
+  const reducerWithMiddleware = useMemo(
+    // TODO find out why `Reducer` type that is returned by `injectMiddlewareToReducer`
+    // does not satisfy `useReducer` below. To check it, just remove `ReactReducer` return
+    // type from right below, so that `reducerWithMiddleware` is inferred by TS from `injectMiddlewareToReducer`.
+    (): ReactReducer<
+      StorageData | undefined,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    > => injectMiddlewareToReducer<StorageData, Reducer>(reducer),
+    [],
+  );
   const [reducerState, dispatch] = useReducer(reducerWithMiddleware, initialState);
 
   const [managerEventWithoutData, setManagerEventWithoutData] = useState<
@@ -79,28 +100,24 @@ export function useStorageReducer<
 
       if (
         // Avoid re-rendering in case if the initial data matches the first data event in case when this
-        // use effect is executed after the data is initialized and the hook itself also is started after the data
-        // is initialized (this is possible if this hook is used two times or more for the same storage
+        // use effect is executed after the data is initialized and the `useStorageReducer` hook itself also is started
+        // after the data is initialized (this is possible if this hook is used two times or more for the same storage
         // in different places of the app).
-        latestPayloadIndexRef.current === payloadIndex ||
-        // Make sure that the new data is not actually the latest local data sent to the storage. We don't need to
-        // update the local data as the reducer updates the local data when the action is dispatched
-        // with `wrappedDispatch`.
-        latestLocalDataSentToStorageRef.current === data
+        latestPayloadIndexRef.current === payloadIndex
       ) {
         return;
       }
 
       latestPayloadIndexRef.current = payloadIndex;
 
-      dispatch(getStorageAction(data) as ReducerAction<Reducer>);
+      dispatch(getStorageAction(data));
       setManagerEventWithoutData({ isInitialized, error, payloadIndex });
     };
 
     // Sync all data from the storage to the state and reducer:
     // - initial data
     // - outside changes
-    // - direct state changes
+    // - direct state changes (outside this hook)
     storageManager.dataEvent.subscribe(handleData);
 
     return () => {
@@ -117,42 +134,72 @@ export function useStorageReducer<
       reducerState !== undefined
     ) {
       latestLocalDataSentToStorageRef.current = reducerState;
-      storageManager.setData(reducerState as StorageData);
+      storageManager.setData(reducerState, {
+        // TODO test it
+        isSilent: true,
+      });
     }
   }, [reducerState]);
 
-  return {
-    reducerState,
-    isInitialized: managerEventWithoutData.isInitialized,
-    dispatch: wrappedDispatch,
-    error: managerEventWithoutData.error,
-  };
+  // TODO consider using `as` to reducer number of if statements
+  if (managerEventWithoutData.isInitialized && managerEventWithoutData.error) {
+    return {
+      reducerState: undefined,
+      isInitialized: managerEventWithoutData.isInitialized,
+      dispatch: wrappedDispatch,
+      error: managerEventWithoutData.error,
+    };
+  } else if (managerEventWithoutData.isInitialized && reducerState) {
+    return {
+      reducerState,
+      isInitialized: managerEventWithoutData.isInitialized,
+      dispatch: wrappedDispatch,
+      error: undefined,
+    };
+  } else {
+    return {
+      reducerState: undefined,
+      isInitialized: false,
+      dispatch: wrappedDispatch,
+      error: undefined,
+    };
+  }
 }
 
-function getStorageAction(data: unknown): StorageAction {
+function getStorageAction<StorageData>(data: StorageData): StorageAction<StorageData> {
   return {
     type: STORAGE_ACTION_TYPE,
     data,
   };
 }
 
-function isStorageAction(action: unknown): action is StorageAction {
+function isStorageAction<StorageData>(action: unknown): action is StorageAction<StorageData> {
   return (
     !!action && typeof action === 'object' && hasOwnProperty(action, 'type') && action.type === STORAGE_ACTION_TYPE
   );
 }
 
-function injectMiddlewareToReducer<StorageData, Reducer extends ReactReducer<StorageData | undefined, unknown>>(
-  reducer: Reducer,
-) {
-  const wrappedReducer = (prevState: StorageData | undefined, action: unknown) => {
+function injectMiddlewareToReducer<
+  StorageData,
+  Reducer extends ReactReducer<
+    StorageData | undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >,
+>(reducer: Reducer): Reducer {
+  const wrappedReducer = (
+    prevState: StorageData | undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    action: any,
+  ): StorageData | undefined => {
     // Whenever there is an update in the storage we need to override the current data in the reducer
-    if (isStorageAction(action)) {
+    if (isStorageAction<StorageData>(action)) {
       return action.data;
     }
 
     return reducer(prevState, action);
   };
 
+  // TODO why types don't match without `as`, as `wrappedReducer` implemented in a way to be compliant with `Reducer`.
   return wrappedReducer as Reducer;
 }

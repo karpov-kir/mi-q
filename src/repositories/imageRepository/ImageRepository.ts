@@ -5,6 +5,44 @@ import { DayTime } from '../../utils';
 import { ImageRepositoryInterface } from './ImageRepositoryInterface';
 import { RandomPhoto } from './unsplashTypes';
 
+// Request URL: https://login.momentumdash.com/user/register?canceled=true
+
+// Response headers:
+// access-control-allow-credentials: true
+// access-control-allow-origin: chrome-extension://laookkfknpbbblfpciffpaejjkokdgca
+// access-control-expose-headers: x-momo-ts-notify
+// content-encoding: gzip
+// content-type: application/json; charset=utf-8
+// date: Tue, 22 Mar 2022 06:37:20 GMT
+// strict-transport-security: max-age=15724800; includeSubDomains; preload
+// vary: Accept-Encoding
+// vary: Origin
+
+// Request headers:
+// :authority: login.momentumdash.com
+// :method: POST
+// :path: /user/register?canceled=true
+// :scheme: https
+// accept: application/json, text/plain, */*
+// accept-encoding: gzip, deflate, br
+// accept-language: en-US,en;q=0.9,ru;q=0.8
+// content-length: 36
+// content-type: application/x-www-form-urlencoded
+// origin: chrome-extension://laookkfknpbbblfpciffpaejjkokdgca
+// sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"
+// sec-ch-ua-mobile: ?0
+// sec-ch-ua-platform: "Windows"
+// sec-fetch-dest: empty
+// sec-fetch-mode: cors
+// sec-fetch-site: none
+// user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36
+// x-momentum-clientdate: 2022-03-22T09:37:19
+// x-momentum-clientid: 9e2920ce-a209-47cc-ba49-1442440d81fa
+// x-momentum-version: 2.5.53
+
+// Response
+// {"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Nzk0NjcwMzkuMCwibmJmIjoxNjQ3OTMwNzM5LjAsImlzcyI6ImxvZ2luLWFwaS12MiIsInVzZXJfZ3VpZCI6IjA1YTk1M2ZlLTNlMGQtNGQwYi1hOTQzLWQ0MjI2ZWU5OWYzNiJ9.rbkTI3xDNlLbYV7t-ZZpzvVXTDPES778yJLCmSMj1WY","token_uuid":"7c76c8b3-e4a8-41c5-a103-c039dbde36d9","status":"Success","settings":{"addIns":[],"features":"WyJub3N5bmMiLCJvZmZsaW5lRGF0YU9ubHkiXQ==","greetings":"eyJ0b2RvIjp7fX0=","ts_onboarding":1647931040010,"user_id":"05a953fe-3e0d-4d0b-a943-d4226ee99f36","experimentEnrollments":[],"createTime":"2022-03-22T06:37:19.46Z"}}
+
 const imageCategories = ['travel', 'nature'];
 
 // The following is from the official documentation.

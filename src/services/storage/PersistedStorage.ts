@@ -1,6 +1,6 @@
 import { NotFoundError } from '../../errors';
 import { PubSub } from '../pubSub';
-import { StorageInterface } from './StorageInterface';
+import { SetItemOptions, StorageInterface } from './StorageInterface';
 
 // Only one storage per key. Storages are never deleted.
 const outsideChangeListeners = new Map<
@@ -43,11 +43,9 @@ window.addEventListener('storage', ({ key, newValue }: StorageEvent) => {
 // be automatically inferred from the `defaultValue` argument. It cannot be done now as
 // the `Value` generic argument is required, so we always have to specify the `DefaultValue` argument if
 // the `defaultValue` argument is not undefined (because partial type argument inference is not supported by TS).
-export class PersistedStorage<Value, DefaultValue extends Value | undefined = undefined>
-  implements StorageInterface<Value>
-{
+export class PersistedStorage<Value> implements StorageInterface<Value> {
   public readonly key: string;
-  public readonly defaultValue: DefaultValue;
+  public readonly defaultValue: Value | undefined;
 
   private static readonly takenKeys = new Set<string>();
   private static readonly namespace = 'ps';
@@ -58,7 +56,7 @@ export class PersistedStorage<Value, DefaultValue extends Value | undefined = un
   public readonly outsideChangeEvent = this.externalChangePubSub.event;
   public readonly changeEvent = this.changePubSub.event;
 
-  constructor(key: string, defaultValue: DefaultValue) {
+  constructor(key: string, defaultValue?: Value) {
     if (PersistedStorage.takenKeys.has(key)) {
       throw new Error('Key is already taken');
     }
@@ -88,10 +86,18 @@ export class PersistedStorage<Value, DefaultValue extends Value | undefined = un
     return JSON.parse(item) as Value;
   }
 
-  public async setItem(data: Value): Promise<void> {
+  public async setItem(
+    data: Value,
+    // TODO cover with unit tests
+    options: SetItemOptions = {},
+  ): Promise<void> {
+    const { isSilent } = options;
+
     localStorage.setItem(this.getStorageKey(), JSON.stringify(data));
 
-    this.changePubSub.publish(data);
+    if (!isSilent) {
+      this.changePubSub.publish(data);
+    }
   }
 
   public async removeItem(): Promise<void> {

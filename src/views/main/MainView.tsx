@@ -85,7 +85,7 @@ export function MainView() {
                   <Shortcuts />
                 </StyledShortcutsContainer>
               )}
-              <div style={{ display: 'none' }}>
+              <div style={{ display: 'block' }}>
                 <ToDo />
                 <ControlPanel />
               </div>

@@ -54,12 +54,12 @@ export function Shortcuts() {
     [],
   );
 
-  if (error) {
-    return <div>Could not initialize the shortcuts</div>;
+  if (!isInitialized) {
+    return null;
   }
 
-  if (!shortcutReducerState || !isInitialized) {
-    return null;
+  if (error) {
+    return <div>Could not initialize the shortcuts</div>;
   }
 
   const { items: shortcutItems } = shortcutReducerState;

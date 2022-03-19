@@ -15,7 +15,7 @@ describe(AsyncCache, () => {
   });
 
   it('should get an item', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined));
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'));
 
     asyncCache.setSource(async () => testItem);
 
@@ -23,13 +23,13 @@ describe(AsyncCache, () => {
   });
 
   it('it should throw an error if a source is not set', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined));
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'));
 
     await expect(asyncCache.getItem()).rejects.toEqual(new Error('Source is not defined'));
   });
 
   it('it should throw an error if a source throws an error', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined));
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'));
 
     asyncCache.setSource(async () => {
       throw new Error('Test');
@@ -39,7 +39,7 @@ describe(AsyncCache, () => {
   });
 
   it('should call a source only once within TTL', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined));
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'));
     const mockedSource = jest.fn().mockResolvedValue(testItem);
 
     asyncCache.setSource(mockedSource);
@@ -52,7 +52,7 @@ describe(AsyncCache, () => {
 
   it('should call a source again when TTL expires', async () => {
     const ttt = 1;
-    const asyncCache = new AsyncCache<typeof testItem>(ttt, new PersistedStorage('test', undefined));
+    const asyncCache = new AsyncCache<typeof testItem>(ttt, new PersistedStorage('test'));
     const mockedSource = jest.fn().mockResolvedValue(testItem);
 
     asyncCache.setSource(mockedSource);
@@ -66,7 +66,7 @@ describe(AsyncCache, () => {
   });
 
   it('it should remove an item', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined));
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'));
     const mockedSource = jest.fn().mockResolvedValue(testItem);
 
     asyncCache.setSource(mockedSource);
@@ -82,7 +82,7 @@ describe(AsyncCache, () => {
   });
 
   it('should return a default value if it is set and a source is not reachable', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined), testItem);
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'), testItem);
 
     asyncCache.setSource(async () => {
       throw new Error('Test');
@@ -92,7 +92,7 @@ describe(AsyncCache, () => {
   });
 
   it('should throw an error if a default value is set but a source is not set', async () => {
-    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test', undefined), testItem);
+    const asyncCache = new AsyncCache<typeof testItem>(defaultTtl, new PersistedStorage('test'), testItem);
 
     await expect(asyncCache.getItem()).rejects.toEqual(new Error('Source is not defined'));
   });

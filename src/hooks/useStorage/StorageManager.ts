@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast';
 
 import { NotFoundError } from '../../errors';
-import { PubSub, StorageInterface } from '../../services';
+import { PubSub, SetItemOptions, StorageInterface } from '../../services';
 
 export interface StorageManagerEvent<StorageData> {
   data?: StorageData;
@@ -121,13 +121,13 @@ export class StorageManager<StorageData> {
       });
   }
 
-  public setData(data: StorageData) {
+  public setData(data: StorageData, options: SetItemOptions = {}) {
     if (!this.isInitialized) {
       throw new Error(`Cannot set data to the ${this.storage.key} storage until it is not initialized`);
     }
 
     // It will fire `dataEvent` using `publishUpdates` in `handleStorageChange`
-    this.storage.setItem(data).catch((error: Error) => {
+    this.storage.setItem(data, options).catch((error: Error) => {
       console.error(`Could not save data to ${this.storage.key} storage`, error);
       toast.error(
         `Could not save data to ${this.storage.key} storage, error: ${error.message}. Data will be lost on page reloading.`,

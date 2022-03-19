@@ -1,7 +1,7 @@
 import { SettingsModel } from '../models';
 import { PersistedStorage } from '../services';
 
-export const settingsPersistedStorage = new PersistedStorage<SettingsModel, SettingsModel>('settings', {
+export const settingsPersistedStorage = new PersistedStorage<SettingsModel>('settings', {
   isClockEnabled: true,
   isGreetingEnabled: false,
   isGreetingWithName: false,

@@ -27,7 +27,7 @@ describe(PersistedStorage, () => {
   });
 
   it('should return a default value if it is set and an item is not found', async () => {
-    const persistedStorage = new PersistedStorage<typeof testItem, typeof testItem>(testKey, {
+    const persistedStorage = new PersistedStorage<typeof testItem>(testKey, {
       testKey: 'default test value',
     });
 
@@ -144,7 +144,7 @@ describe(PersistedStorage, () => {
 
   it('should notify with a default value if it is set and when an item is changed externally', async () => {
     const mockedSubscriber = jest.fn();
-    const persistedStorage = new PersistedStorage<typeof testItem, typeof testItem>(testKey, testItem);
+    const persistedStorage = new PersistedStorage<typeof testItem>(testKey, testItem);
 
     persistedStorage.outsideChangeEvent.subscribe(mockedSubscriber);
 

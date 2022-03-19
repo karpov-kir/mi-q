@@ -5,9 +5,6 @@ export interface ShortcutsPersistedStorageData {
   items: ShortcutItemModel[];
 }
 
-export const shortcutsPersistedStorage = new PersistedStorage<
-  ShortcutsPersistedStorageData,
-  ShortcutsPersistedStorageData
->('shortcuts', {
+export const shortcutsPersistedStorage = new PersistedStorage<ShortcutsPersistedStorageData>('shortcuts', {
   items: [],
 });
